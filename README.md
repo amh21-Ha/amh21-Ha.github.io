@@ -54,7 +54,7 @@ PDF Reports (Executive Summary & Detailed Report)
 
 Preview before download (demo version)
 
-##🔹 Technical Implementation
+#🔹 Technical Implementation
 ### 📌 Frontend
 Pure HTML/CSS/JS (no frameworks)
 
@@ -82,7 +82,7 @@ No server-side code (protects intellectual property)
 
 Confidential data is not stored permanently
 
-##🔹 How It Works
+#🔹 How It Works
 User logs in (Admin or Analyst)
 
 Admin uploads CSV data (ATM transaction records)
@@ -99,7 +99,7 @@ User views dashboard & analytics
 
 Generates reports (CSV/PDF)
 
-##🔹 Limitations (MVP)
+#🔹 Limitations (MVP)
 No permanent data storage (clears on refresh)
 
 Demo credentials only (no real authentication)
@@ -108,14 +108,14 @@ Basic risk calculation (simple formula)
 
 PDF export is a preview (full export requires backend)
 
-##🔹 Future Enhancements
+#🔹 Future Enhancements
 ✅ Add a real backend (Node.js, Firebase, or AWS)
 ✅ Database integration (PostgreSQL, MongoDB)
 ✅ Advanced risk-scoring algorithms
 ✅ Email/SMS alerts for high-risk incidents
 ✅ Multi-user collaboration
 
-## 🚀 Ready to Deploy
+# 🚀 Ready to Deploy
 This is a fully functional MVP that can be hosted on:
 
 GitHub Pages

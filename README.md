@@ -1,8 +1,8 @@
-### ATM Security Monitoring Platform - Code Description
+# ATM Security Monitoring Platform - Code Description
 This is a client-side web application built with HTML, CSS, and JavaScript that allows financial institutions to monitor ATM security incidents. It provides role-based access control, data analysis, and reporting features.
 
 ##🔹 Key Features
-# 1. Authentication & Role-Based Access
+### 1. Authentication & Role-Based Access
 Two user roles:
 
 Admin (CEO): Full access (upload data, view analytics, generate reports)
@@ -17,7 +17,7 @@ Admin: admin / admin123
 
 Analyst: analyst / analyst123
 
-# 2. Data Upload & Processing
+### 2. Data Upload & Processing
 CSV file upload (drag-and-drop or file browser)
 
 Real-time validation (checks for required columns)
@@ -26,7 +26,7 @@ Data preview before processing
 
 Stores data in browser memory (sessionStorage)
 
-# 3. Dashboard & Analytics
+### 3. Dashboard & Analytics
 Key Metrics:
 
 Total losses
@@ -47,7 +47,7 @@ Riskiest districts
 
 Trend Visualization (Chart.js)
 
-# 4. Reporting
+### 4. Reporting
 CSV Export (download transaction data)
 
 PDF Reports (Executive Summary & Detailed Report)
@@ -55,7 +55,7 @@ PDF Reports (Executive Summary & Detailed Report)
 Preview before download (demo version)
 
 ##🔹 Technical Implementation
-# 📌 Frontend
+### 📌 Frontend
 Pure HTML/CSS/JS (no frameworks)
 
 Responsive design (works on desktop & tablet)
@@ -68,14 +68,14 @@ Chart.js (data visualization)
 
 jsPDF + html2canvas (PDF generation)
 
-# 📌 Data Storage
+### 📌 Data Storage
 Client-side only (no backend)
 
 Uses sessionStorage (clears when browser closes)
 
 No database required
 
-# 📌 Security & IP Protection
+### 📌 Security & IP Protection
 All processing happens in the browser
 
 No server-side code (protects intellectual property)

@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATM Security Monitoring Platform</title>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary: #1a3a6c;
+            --secondary: #2c5282;
+            --accent: #4c7bc8;
+            --success: #38a169;
+            --warning: #ecc94b;
+            --danger: #e53e3e;
+            --light: #f7fafc;
+            --dark: #1a202c;
+            --gray: #e2e8f0;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #edf2f7;
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+        
+        /* Header & Navigation */
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .logo-icon {
+            font-size: 1.8rem;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+        
+        nav a:hover, nav a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .role-badge {
+            background-color: var(--accent);
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        
+        /* Main Views */
+        .view {
+            display: none;
+            padding: 2rem 0;
+            flex: 1;
+        }
+        
+        .view.active {
+            display: block;
+        }
+        
+        /* Login View */
+        .login-container {
+            max-width: 400px;
+            margin: 5rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .login-title {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .login-form .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .login-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .login-form input, .login-form select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary);
+        }
+        
+        .error-message {
+            color: var(--danger);
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        /* Dashboard */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 1rem 0;
+            color: var(--primary);
+        }
+        
+        .metric-title {
+            font-size: 1.1rem;
+            color: #718096;
+        }
+        
+        .risk-indicator {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .risk-high {
+            background-color: #fed7d7;
+            color: #e53e3e;
+        }
+        
+        .risk-medium {
+            background-color: #fefcbf;
+            color: #d69e2e;
+        }
+        
+        .risk-low {
+            background-color: #c6f6d5;
+            color: #38a169;
+        }
+        
+        .top-risks {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .risk-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .risk-card h3 {
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .risk-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .risk-item:last-child {
+            border-bottom: none;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            height: 400px;
+        }
+        
+        /* Data Upload */
+        .upload-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .drop-zone {
+            border: 2px dashed var(--gray);
+            border-radius: 10px;
+            padding: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        .drop-zone.active {
+            border-color: var(--accent);
+            background-color: rgba(76, 123, 200, 0.05);
+        }
+        
+        .drop-zone p {
+            margin-top: 1rem;
+            color: #718096;
+        }
+        
+        .file-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: var(--light);
+            border-radius: 6px;
+        }
+        
+        .data-preview {
+            margin-top: 2rem;
+            max-height: 400px;
+            overflow: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        th {
+            background-color: var(--light);
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: rgba(76, 123, 200, 0.05);
+        }
+        
+        /* Analytics */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .analytics-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            height: 500px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .analytics-card h3 {
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .analytics-content {
+            flex: 1;
+            overflow: auto;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--primary);
+            color: white;
+            padding: 1.5rem 0;
+            margin-top: auto;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .user-info {
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <span class="logo-icon">🏧</span>
+                <span>ATM Security Monitor</span>
+            </div>
+            <nav id="main-nav" style="display: none;">
+                <ul>
+                    <li><a href="#dashboard" class="nav-link active" data-view="dashboard">Dashboard</a></li>
+                    <li><a href="#upload" class="nav-link" data-view="upload">Upload Data</a></li>
+                    <li><a href="#analytics" class="nav-link" data-view="analytics">Analytics</a></li>
+                    <li><a href="#reports" class="nav-link" data-view="reports">Reports</a></li>
+                </ul>
+            </nav>
+            <div class="user-info" id="user-info" style="display: none;">
+                <span id="username-display">Admin</span>
+                <span class="role-badge" id="role-display">Admin</span>
+                <button id="logout-btn" class="btn btn-primary" style="padding: 0.4rem 0.8rem;">Logout</button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content Views -->
+    <main class="container">
+        <!-- Login View -->
+        <section id="login-view" class="view active">
+            <div class="login-container">
+                <h1 class="login-title">ATM Security Platform</h1>
+                <form id="login-form" class="login-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Role</label>
+                        <select id="role" required>
+                            <option value="">Select Role</option>
+                            <option value="admin">Admin</option>
+                            <option value="analyst">Analyst</option>
+                        </select>
+                    </div>
+                    <div id="login-error" class="error-message" style="display: none;"></div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+            </div>
+        </section>
+        
+        <!-- Dashboard View -->
+        <section id="dashboard-view" class="view">
+            <div class="dashboard-header">
+                <h2>Security Dashboard</h2>
+                <div>
+                    <span>Last Updated: <span id="last-updated">Today</span></span>
+                </div>
+            </div>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3 class="metric-title">Total Losses</h3>
+                    <div class="metric-value" id="total-losses">€0</div>
+                    <div class="risk-indicator risk-high" id="loss-risk">High Risk</div>
+                </div>
+                <div class="metric-card">
+                    <h3 class="metric-title">Incident Count</h3>
+                    <div class="metric-value" id="incident-count">0</div>
+                    <div class="risk-indicator risk-medium" id="incident-trend">▲ 12%</div>
+                </div>
+                <div class="metric-card">
+                    <h3 class="metric-title">Avg Loss/Incident</h3>
+                    <div class="metric-value" id="avg-loss">€0</div>
+                    <div class="risk-indicator risk-low" id="avg-trend">▼ 5%</div>
+                </div>
+                <div class="metric-card">
+                    <h3 class="metric-title">Security Risk Level</h3>
+                    <div class="metric-value" id="risk-level">Medium</div>
+                    <div class="risk-indicator risk-high">Requires Attention</div>
+                </div>
+            </div>
+            
+            <div class="top-risks">
+                <div class="risk-card">
+                    <h3>Highest Risk Crew Members</h3>
+                    <div id="top-crew-list">
+                        <div class="risk-item">
+                            <span>Loading...</span>
+                            <span>€0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="risk-card">
+                    <h3>Most Vulnerable Machines</h3>
+                    <div id="top-machines-list">
+                        <div class="risk-item">
+                            <span>Loading...</span>
+                            <span>€0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="risk-card">
+                    <h3>Riskiest Districts</h3>
+                    <div id="top-districts-list">
+                        <div class="risk-item">
+                            <span>Loading...</span>
+                            <span>€0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="trend-chart"></canvas>
+            </div>
+        </section>
+        
+        <!-- Data Upload View -->
+        <section id="upload-view" class="view">
+            <h2>Upload Transaction Data</h2>
+            <div class="upload-container">
+                <div id="drop-zone" class="drop-zone">
+                    <h3>Drag & Drop CSV File Here</h3>
+                    <p>or</p>
+                    <button id="browse-btn" class="btn btn-primary">Browse Files</button>
+                    <input type="file" id="file-input" accept=".csv" style="display: none;">
+                </div>
+                
+                <div id="file-info" class="file-info" style="display: none;">
+                    <h4>Selected File: <span id="file-name">No file selected</span></h4>
+                    <p>Rows: <span id="row-count">0</span> | Columns: <span id="column-count">0</span></p>
+                    <div id="validation-errors" style="margin-top: 10px; color: #e53e3e;"></div>
+                    <button id="process-btn" class="btn btn-primary" style="margin-top: 15px;">Process Data</button>
+                </div>
+                
+                <div id="data-preview" class="data-preview" style="display: none;">
+                    <h3>Data Preview</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Code</th>
+                                <th>Amount</th>
+                                <th>Type</th>
+                                <th>Crew</th>
+                                <th>District</th>
+                                <th>Company</th>
+                            </tr>
+                        </thead>
+                        <tbody id="preview-body">
+                            <!-- Preview rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Analytics View -->
+        <section id="analytics-view" class="view">
+            <h2>Security Analytics</h2>
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <h3>Crew Performance</h3>
+                    <div class="analytics-content">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Crew</th>
+                                    <th>Incidents</th>
+                                    <th>Total Loss</th>
+                                    <th>Avg Loss</th>
+                                    <th>Risk Level</th>
+                                </tr>
+                            </thead>
+                            <tbody id="crew-performance-body">
+                                <!-- Crew data will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="analytics-card">
+                    <h3>Machine Vulnerability</h3>
+                    <div class="analytics-content">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Machine</th>
+                                    <th>Incidents</th>
+                                    <th>Total Loss</th>
+                                    <th>Avg Loss</th>
+                                    <th>Risk Score</th>
+                                </tr>
+                            </thead>
+                            <tbody id="machine-vulnerability-body">
+                                <!-- Machine data will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="analytics-card">
+                    <h3>District Risk Analysis</h3>
+                    <div class="analytics-content">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>District</th>
+                                    <th>Incidents</th>
+                                    <th>Total Loss</th>
+                                    <th>Companies</th>
+                                    <th>Risk Level</th>
+                                </tr>
+                            </thead>
+                            <tbody id="district-risk-body">
+                                <!-- District data will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Reports View -->
+        <section id="reports-view" class="view">
+            <h2>Generate Reports</h2>
+            <div class="upload-container">
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h3>CSV Export</h3>
+                        <p>Export transaction data for further analysis</p>
+                        <button id="export-csv-btn" class="btn btn-primary" style="margin-top: 15px;">Export CSV</button>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Executive Summary</h3>
+                        <p>2-page overview of key security metrics</p>
+                        <button id="export-summary-btn" class="btn btn-primary" style="margin-top: 15px;">Generate PDF</button>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Detailed Report</h3>
+                        <p>4-6 page comprehensive security analysis</p>
+                        <button id="export-detail-btn" class="btn btn-primary" style="margin-top: 15px;">Generate PDF</button>
+                    </div>
+                </div>
+                
+                <div id="report-preview" style="margin-top: 2rem; background: white; padding: 1.5rem; border-radius: 10px; display: none;">
+                    <h3>Report Preview</h3>
+                    <div id="pdf-preview-content">
+                        <!-- PDF preview will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-content">
+            <div>ATM Security Monitoring Platform &copy; 2023</div>
+            <div>Confidential & Proprietary</div>
+        </div>
+    </footer>
+    
+    <script>
+        // Application state
+        const state = {
+            currentUser: null,
+            transactionData: [],
+            currentView: 'login',
+            analyticsData: {
+                crewPerformance: [],
+                machineVulnerability: [],
+                districtRisk: []
+            }
+        };
+        
+        // DOM Elements
+        const elements = {
+            views: {
+                login: document.getElementById('login-view'),
+                dashboard: document.getElementById('dashboard-view'),
+                upload: document.getElementById('upload-view'),
+                analytics: document.getElementById('analytics-view'),
+                reports: document.getElementById('reports-view')
+            },
+            loginForm: document.getElementById('login-form'),
+            mainNav: document.getElementById('main-nav'),
+            userInfo: document.getElementById('user-info'),
+            navLinks: document.querySelectorAll('.nav-link'),
+            logoutBtn: document.getElementById('logout-btn'),
+            fileInput: document.getElementById('file-input'),
+            dropZone: document.getElementById('drop-zone'),
+            browseBtn: document.getElementById('browse-btn'),
+            fileInfo: document.getElementById('file-info'),
+            processBtn: document.getElementById('process-btn'),
+            dataPreview: document.getElementById('data-preview'),
+            previewBody: document.getElementById('preview-body'),
+            exportCsvBtn: document.getElementById('export-csv-btn'),
+            exportSummaryBtn: document.getElementById('export-summary-btn'),
+            exportDetailBtn: document.getElementById('export-detail-btn'),
+            reportPreview: document.getElementById('report-preview'),
+            pdfPreview: document.getElementById('pdf-preview-content')
+        };
+        
+        // Initialize the application
+        function init() {
+            // Check if user is already logged in
+            const savedUser = sessionStorage.getItem('atm_user');
+            if (savedUser) {
+                state.currentUser = JSON.parse(savedUser);
+                showMainApp();
+            }
+            
+            // Set up event listeners
+            setupEventListeners();
+        }
+        
+        // Set up all event listeners
+        function setupEventListeners() {
+            // Login form
+            elements.loginForm.addEventListener('submit', handleLogin);
+            
+            // Navigation
+            elements.navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showView(link.dataset.view);
+                });
+            });
+            
+            // Logout
+            elements.logoutBtn.addEventListener('click', handleLogout);
+            
+            // File upload
+            elements.browseBtn.addEventListener('click', () => elements.fileInput.click());
+            elements.fileInput.addEventListener('change', handleFileSelect);
+            elements.dropZone.addEventListener('dragover', handleDragOver);
+            elements.dropZone.addEventListener('dragleave', handleDragLeave);
+            elements.dropZone.addEventListener('drop', handleFileDrop);
+            elements.processBtn.addEventListener('click', processData);
+            
+            // Reports
+            elements.exportCsvBtn.addEventListener('click', exportCSV);
+            elements.exportSummaryBtn.addEventListener('click', () => generatePDF('summary'));
+            elements.exportDetailBtn.addEventListener('click', () => generatePDF('detail'));
+        }
+        
+        // Handle login form submission
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            
+            // Simple validation
+            if (!username || !password || !role) {
+                showLoginError('Please fill in all fields');
+                return;
+            }
+            
+            // Hardcoded credentials for demo
+            const validCredentials = {
+                admin: { password: 'admin123', role: 'admin' },
+                analyst: { password: 'analyst123', role: 'analyst' }
+            };
+            
+            if (validCredentials[username] && validCredentials[username].password === password) {
+                state.currentUser = {
+                    username,
+                    role: validCredentials[username].role
+                };
+                
+                // Save to session storage
+                sessionStorage.setItem('atm_user', JSON.stringify(state.currentUser));
+                
+                showMainApp();
+            } else {
+                showLoginError('Invalid username or password');
+            }
+        }
+        
+        // Show login error message
+        function showLoginError(message) {
+            const errorEl = document.getElementById('login-error');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            
+            setTimeout(() => {
+                errorEl.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Show main application after login
+        function showMainApp() {
+            // Hide login view
+            elements.views.login.classList.remove('active');
+            
+            // Show navigation and user info
+            elements.mainNav.style.display = 'block';
+            elements.userInfo.style.display = 'flex';
+            
+            // Update user info display
+            document.getElementById('username-display').textContent = state.currentUser.username;
+            document.getElementById('role-display').textContent = state.currentUser.role.charAt(0).toUpperCase() + state.currentUser.role.slice(1);
+            
+            // Load any existing data
+            const savedData = sessionStorage.getItem('atm_data');
+            if (savedData) {
+                state.transactionData = JSON.parse(savedData);
+                updateAnalyticsData();
+                updateDashboard();
+            }
+            
+            // Show dashboard view
+            showView('dashboard');
+        }
+        
+        // Handle logout
+        function handleLogout() {
+            sessionStorage.removeItem('atm_user');
+            sessionStorage.removeItem('atm_data');
+            state.currentUser = null;
+            state.transactionData = [];
+            
+            // Reset UI
+            elements.mainNav.style.display = 'none';
+            elements.userInfo.style.display = 'none';
+            elements.views.login.classList.add('active');
+            
+            // Reset login form
+            elements.loginForm.reset();
+        }
+        
+        // Show a specific view
+        function showView(viewName) {
+            // Hide all views
+            Object.values(elements.views).forEach(view => view.classList.remove('active'));
+            
+            // Show selected view
+            elements.views[viewName].classList.add('active');
+            
+            // Update active nav link
+            elements.navLinks.forEach(link => {
+                if (link.dataset.view === viewName) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+            
+            // Role-based view restrictions
+            if (state.currentUser.role === 'analyst' && viewName === 'upload') {
+                showView('dashboard');
+                alert('Analysts do not have permission to upload data');
+            }
+        }
+        
+        // Handle file selection
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                prepareFile(file);
+            }
+        }
+        
+        // Handle drag over event
+        function handleDragOver(e) {
+            e.preventDefault();
+            elements.dropZone.classList.add('active');
+        }
+        
+        // Handle drag leave event
+        function handleDragLeave(e) {
+            e.preventDefault();
+            elements.dropZone.classList.remove('active');
+        }
+        
+        // Handle file drop
+        function handleFileDrop(e) {
+            e.preventDefault();
+            elements.dropZone.classList.remove('active');
+            
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                prepareFile(file);
+            }
+        }
+        
+        // Prepare file for processing
+        function prepareFile(file) {
+            // Check file type
+            if (!file.name.toLowerCase().endsWith('.csv')) {
+                alert('Please select a CSV file');
+                return;
+            }
+            
+            // Update file info display
+            document.getElementById('file-name').textContent = file.name;
+            elements.fileInfo.style.display = 'block';
+            
+            // Read file
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                parseCSV(e.target.result);
+            };
+            reader.readAsText(file);
+        }
+        
+        // Parse CSV data
+        function parseCSV(csv) {
+            Papa.parse(csv, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    // Validate required columns
+                    const requiredColumns = ['datetime', 'code', 'amount', 'group1', 'group2', 'company'];
+                    const missingColumns = requiredColumns.filter(col => !results.meta.fields.includes(col));
+                    
+                    if (missingColumns.length > 0) {
+                        document.getElementById('validation-errors').innerHTML = 
+                            `<div class="error-message">Missing required columns: ${missingColumns.join(', ')}</div>`;
+                        return;
+                    }
+                    
+                    // Update row count display
+                    document.getElementById('row-count').textContent = results.data.length;
+                    document.getElementById('column-count').textContent = results.meta.fields.length;
+                    
+                    // Clear previous errors
+                    document.getElementById('validation-errors').innerHTML = '';
+                    
+                    // Store data temporarily for preview
+                    state.tempData = results.data;
+                    
+                    // Show preview
+                    showDataPreview();
+                },
+                error: function(error) {
+                    document.getElementById('validation-errors').innerHTML = 
+                        `<div class="error-message">Error parsing CSV: ${error.message}</div>`;
+                }
+            });
+        }
+        
+        // Show data preview
+        function showDataPreview() {
+            elements.previewBody.innerHTML = '';
+            
+            // Show only first 10 rows for preview
+            const previewData = state.tempData.slice(0, 10);
+            
+            previewData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.datetime.substring(0, 10)}</td>
+                    <td>${row.code}</td>
+                    <td>€${Math.abs(parseInt(row.amount)).toLocaleString()}</td>
+                    <td>${row.type}</td>
+                    <td>${row.group1}</td>
+                    <td>${row.group2}</td>
+                    <td>${row.company}</td>
+                `;
+                elements.previewBody.appendChild(tr);
+            });
+            
+            elements.dataPreview.style.display = 'block';
+        }
+        
+        // Process and store data
+        function processData() {
+            // Convert amounts to numbers
+            state.tempData.forEach(transaction => {
+                transaction.amount = parseInt(transaction.amount);
+            });
+            
+            state.transactionData = state.tempData;
+            delete state.tempData;
+            
+            // Save to session storage
+            sessionStorage.setItem('atm_data', JSON.stringify(state.transactionData));
+            
+            // Update analytics and dashboard
+            updateAnalyticsData();
+            updateDashboard();
+            
+            // Show success message
+            alert(`Successfully processed ${state.transactionData.length} transactions`);
+            
+            // Reset file info
+            elements.fileInfo.style.display = 'none';
+            elements.dataPreview.style.display = 'none';
+            
+            // Return to dashboard
+            showView('dashboard');
+        }
+        
+        // Update analytics data
+        function updateAnalyticsData() {
+            if (state.transactionData.length === 0) return;
+            
+            // Crew Performance
+            const crewMap = new Map();
+            state.transactionData.forEach(transaction => {
+                const crew = transaction.group1;
+                if (!crewMap.has(crew)) {
+                    crewMap.set(crew, { count: 0, total: 0, min: Infinity, max: 0 });
+                }
+                
+                const crewData = crewMap.get(crew);
+                const amount = Math.abs(transaction.amount);
+                
+                crewData.count++;
+                crewData.total += amount;
+                if (amount < crewData.min) crewData.min = amount;
+                if (amount > crewData.max) crewData.max = amount;
+            });
+            
+            state.analyticsData.crewPerformance = Array.from(crewMap.entries()).map(([crew, data]) => {
+                return {
+                    crew,
+                    count: data.count,
+                    total: data.total,
+                    average: data.total / data.count,
+                    min: data.min,
+                    max: data.max,
+                    risk: calculateRisk(data.total, data.count)
+                };
+            }).sort((a, b) => b.total - a.total);
+            
+            // Machine Vulnerability
+            const machineMap = new Map();
+            state.transactionData.forEach(transaction => {
+                const machine = transaction.code;
+                if (!machineMap.has(machine)) {
+                    machineMap.set(machine, { count: 0, total: 0, min: Infinity, max: 0 });
+                }
+                
+                const machineData = machineMap.get(machine);
+                const amount = Math.abs(transaction.amount);
+                
+                machineData.count++;
+                machineData.total += amount;
+                if (amount < machineData.min) machineData.min = amount;
+                if (amount > machineData.max) machineData.max = amount;
+            });
+            
+            state.analyticsData.machineVulnerability = Array.from(machineMap.entries()).map(([machine, data]) => {
+                return {
+                    machine,
+                    count: data.count,
+                    total: data.total,
+                    average: data.total / data.count,
+                    min: data.min,
+                    max: data.max,
+                    risk: calculateRisk(data.total, data.count)
+                };
+            }).sort((a, b) => b.total - a.total);
+            
+            // District Risk
+            const districtMap = new Map();
+            state.transactionData.forEach(transaction => {
+                const district = transaction.group2;
+                if (!districtMap.has(district)) {
+                    districtMap.set(district, { 
+                        count: 0, 
+                        total: 0, 
+                        companies: new Set(),
+                        min: Infinity,
+                        max: 0
+                    });
+                }
+                
+                const districtData = districtMap.get(district);
+                const amount = Math.abs(transaction.amount);
+                
+                districtData.count++;
+                districtData.total += amount;
+                districtData.companies.add(transaction.company);
+                if (amount < districtData.min) districtData.min = amount;
+                if (amount > districtData.max) districtData.max = amount;
+            });
+            
+            state.analyticsData.districtRisk = Array.from(districtMap.entries()).map(([district, data]) => {
+                return {
+                    district,
+                    count: data.count,
+                    total: data.total,
+                    companies: data.companies.size,
+                    average: data.total / data.count,
+                    min: data.min,
+                    max: data.max,
+                    risk: calculateRisk(data.total, data.count)
+                };
+            }).sort((a, b) => b.total - a.total);
+            
+            // Update analytics view
+            updateAnalyticsView();
+        }
+        
+        // Calculate risk level
+        function calculateRisk(total, count) {
+            const avg = total / count;
+            if (avg > 3000) return 'High';
+            if (avg > 2000) return 'Medium';
+            return 'Low';
+        }
+        
+        // Update dashboard view
+        function updateDashboard() {
+            if (state.transactionData.length === 0) return;
+            
+            // Calculate metrics
+            const totalLoss = state.transactionData.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+            const incidentCount = state.transactionData.length;
+            const avgLoss = totalLoss / incidentCount;
+            
+            // Update metrics display
+            document.getElementById('total-losses').textContent = `€${totalLoss.toLocaleString()}`;
+            document.getElementById('incident-count').textContent = incidentCount.toLocaleString();
+            document.getElementById('avg-loss').textContent = `€${Math.round(avgLoss).toLocaleString()}`;
+            
+            // Update risk indicators
+            document.getElementById('loss-risk').textContent = totalLoss > 500000 ? 'High Risk' : 'Medium Risk';
+            document.getElementById('loss-risk').className = totalLoss > 500000 ? 
+                'risk-indicator risk-high' : 'risk-indicator risk-medium';
+            
+            // Update top risks
+            updateTopRisks();
+            
+            // Update trend chart
+            updateTrendChart();
+        }
+        
+        // Update top risks display
+        function updateTopRisks() {
+            // Top crew members
+            const topCrewList = document.getElementById('top-crew-list');
+            topCrewList.innerHTML = '';
+            
+            state.analyticsData.crewPerformance.slice(0, 3).forEach(crew => {
+                const div = document.createElement('div');
+                div.className = 'risk-item';
+                div.innerHTML = `
+                    <span>${crew.crew}</span>
+                    <span>€${crew.total.toLocaleString()}</span>
+                `;
+                topCrewList.appendChild(div);
+            });
+            
+            // Top machines
+            const topMachinesList = document.getElementById('top-machines-list');
+            topMachinesList.innerHTML = '';
+            
+            state.analyticsData.machineVulnerability.slice(0, 3).forEach(machine => {
+                const div = document.createElement('div');
+                div.className = 'risk-item';
+                div.innerHTML = `
+                    <span>${machine.machine}</span>
+                    <span>€${machine.total.toLocaleString()}</span>
+                `;
+                topMachinesList.appendChild(div);
+            });
+            
+            // Top districts
+            const topDistrictsList = document.getElementById('top-districts-list');
+            topDistrictsList.innerHTML = '';
+            
+            state.analyticsData.districtRisk.slice(0, 3).forEach(district => {
+                const div = document.createElement('div');
+                div.className = 'risk-item';
+                div.innerHTML = `
+                    <span>${district.district}</span>
+                    <span>€${district.total.toLocaleString()}</span>
+                `;
+                topDistrictsList.appendChild(div);
+            });
+        }
+        
+        // Update trend chart
+        function updateTrendChart() {
+            // Group by date (simplified for demo)
+            const dateMap = new Map();
+            state.transactionData.forEach(t => {
+                const date = t.datetime.substring(0, 10);
+                if (!dateMap.has(date)) {
+                    dateMap.set(date, 0);
+                }
+                dateMap.set(date, dateMap.get(date) + Math.abs(t.amount));
+            });
+            
+            const dates = Array.from(dateMap.keys()).sort();
+            const amounts = dates.map(date => dateMap.get(date));
+            
+            // Create or update chart
+            const ctx = document.getElementById('trend-chart').getContext('2d');
+            
+            if (window.trendChart) {
+                window.trendChart.destroy();
+            }
+            
+            window.trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Daily Losses',
+                        data: amounts,
+                        borderColor: '#e53e3e',
+                        backgroundColor: 'rgba(229, 62, 62, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Daily Loss Trends'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Loss Amount (€)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update analytics view
+        function updateAnalyticsView() {
+            // Crew Performance
+            const crewBody = document.getElementById('crew-performance-body');
+            crewBody.innerHTML = '';
+            
+            state.analyticsData.crewPerformance.slice(0, 10).forEach(crew => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${crew.crew}</td>
+                    <td>${crew.count}</td>
+                    <td>€${crew.total.toLocaleString()}</td>
+                    <td>€${Math.round(crew.average).toLocaleString()}</td>
+                    <td><span class="risk-indicator ${crew.risk === 'High' ? 'risk-high' : crew.risk === 'Medium' ? 'risk-medium' : 'risk-low'}">${crew.risk}</span></td>
+                `;
+                crewBody.appendChild(tr);
+            });
+            
+            // Machine Vulnerability
+            const machineBody = document.getElementById('machine-vulnerability-body');
+            machineBody.innerHTML = '';
+            
+            state.analyticsData.machineVulnerability.slice(0, 10).forEach(machine => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${machine.machine}</td>
+                    <td>${machine.count}</td>
+                    <td>€${machine.total.toLocaleString()}</td>
+                    <td>€${Math.round(machine.average).toLocaleString()}</td>
+                    <td><span class="risk-indicator ${machine.risk === 'High' ? 'risk-high' : machine.risk === 'Medium' ? 'risk-medium' : 'risk-low'}">${machine.risk}</span></td>
+                `;
+                machineBody.appendChild(tr);
+            });
+            
+            // District Risk
+            const districtBody = document.getElementById('district-risk-body');
+            districtBody.innerHTML = '';
+            
+            state.analyticsData.districtRisk.slice(0, 10).forEach(district => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${district.district}</td>
+                    <td>${district.count}</td>
+                    <td>€${district.total.toLocaleString()}</td>
+                    <td>${district.companies}</td>
+                    <td><span class="risk-indicator ${district.risk === 'High' ? 'risk-high' : district.risk === 'Medium' ? 'risk-medium' : 'risk-low'}">${district.risk}</span></td>
+                `;
+                districtBody.appendChild(tr);
+            });
+        }
+        
+        // Export CSV
+        function exportCSV() {
+            if (state.transactionData.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            
+            const csv = Papa.unparse(state.transactionData);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            const date = new Date().toISOString().slice(0, 10);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `atm_data_${date}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Generate PDF report
+        function generatePDF(type) {
+            if (state.transactionData.length === 0) {
+                alert('No data to generate report');
+                return;
+            }
+            
+            // For demo, we'll just show a preview
+            elements.pdfPreview.innerHTML = `
+                <div style="background: white; padding: 20px; border: 1px solid #ccc;">
+                    <h3>${type === 'summary' ? 'Executive Summary' : 'Detailed Security Report'}</h3>
+                    <p>Report generated: ${new Date().toLocaleDateString()}</p>
+                    <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                        <div>
+                            <h4>Key Metrics</h4>
+                            <p>Total Losses: €${state.transactionData.reduce((sum, t) => sum + Math.abs(t.amount), 0).toLocaleString()}</p>
+                            <p>Incident Count: ${state.transactionData.length.toLocaleString()}</p>
+                            <p>Avg Loss/Incident: €${Math.round(state.transactionData.reduce((sum, t) => sum + Math.abs(t.amount), 0) / state.transactionData.length).toLocaleString()}</p>
+                        </div>
+                        <div>
+                            <h4>Top Risks</h4>
+                            <p>Highest Risk Crew: ${state.analyticsData.crewPerformance[0]?.crew || 'N/A'}</p>
+                            <p>Most Vulnerable Machine: ${state.analyticsData.machineVulnerability[0]?.machine || 'N/A'}</p>
+                            <p>Riskiest District: ${state.analyticsData.districtRisk[0]?.district || 'N/A'}</p>
+                        </div>
+                    </div>
+                    ${type === 'detail' ? `
+                    <div style="margin-top: 20px;">
+                        <h4>Crew Performance</h4>
+                        <p>Top 5 crew members by losses:</p>
+                        <ul>
+                            ${state.analyticsData.crewPerformance.slice(0, 5).map(crew => 
+                                `<li>${crew.crew}: €${crew.total.toLocaleString()} (${crew.count} incidents)</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <h4>Recommendations</h4>
+                        <p>1. Increase security patrols in high-risk districts</p>
+                        <p>2. Schedule maintenance for vulnerable machines</p>
+                        <p>3. Retrain crew members with high incident rates</p>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            elements.reportPreview.style.display = 'block';
+            
+            // In a real implementation, we would use jsPDF and html2canvas
+            // to generate and download the actual PDF
+        }
+        
+        // Initialize the application when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

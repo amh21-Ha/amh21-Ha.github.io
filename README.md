@@ -109,10 +109,15 @@ Basic risk calculation (simple formula)
 PDF export is a preview (full export requires backend)
 
 #🔹 Future Enhancements
+
 ✅ Add a real backend (Node.js, Firebase, or AWS)
+
 ✅ Database integration (PostgreSQL, MongoDB)
+
 ✅ Advanced risk-scoring algorithms
+
 ✅ Email/SMS alerts for high-risk incidents
+
 ✅ Multi-user collaboration
 
 # 🚀 Ready to Deploy

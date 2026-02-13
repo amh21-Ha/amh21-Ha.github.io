@@ -5,7 +5,7 @@ This is a client-side web application built with HTML, CSS, and JavaScript that 
 ### 1. Authentication & Role-Based Access
 Two user roles:
 
-Admin (CEO): Full access (upload data, view analytics, generate reports)
+#### Admin (CEO): Full access (upload data, view analytics, generate reports)
 
 Analyst: Read-only access (dashboard & analytics only)
 
@@ -13,9 +13,9 @@ Session management (auto-logout after inactivity)
 
 Hardcoded credentials (for demo purposes):
 
-Admin User: admin Password: admin123
+##### Admin User: admin Password: admin123
 
-Analyst User: analyst Password: analyst123
+##### Analyst User: analyst Password: analyst123
 
 ### 2. Data Upload & Processing
 CSV file upload (drag-and-drop or file browser)

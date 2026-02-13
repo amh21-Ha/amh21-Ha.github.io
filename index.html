@@ -383,7 +383,24 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+        /* Highlight password field */
+        .password-highlight input {
+            border: 2px solid #ecc94b;
+            background-color: #fffbea;
+        }
+
+        .password-highlight input:focus {
+            outline: none;
+            border-color: #d69e2e;
+            box-shadow: 0 0 0 3px rgba(214, 158, 46, 0.3);
+        }
+
+        .readme-note {
+            font-size: 0.85rem;
+            color: #d69e2e;
+            font-weight: 500;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .header-content {
@@ -437,10 +454,19 @@
                         <label for="username">Username</label>
                         <input type="text" id="username" required>
                     </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
+                    <div class="form-group password-highlight">
+                        <label for="password">
+                            Password
+                            <span class="readme-note">
+                                (See GitHub README for demo credentials)
+                            </span>
+                        </label>
                         <input type="password" id="password" required>
+                        <small class="readme-helper">
+                            Demo credentials are available in the project README file.
+                        </small>
                     </div>
+
                     <div class="form-group">
                         <label for="role">Role</label>
                         <select id="role" required>

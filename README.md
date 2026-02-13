@@ -13,9 +13,9 @@ Session management (auto-logout after inactivity)
 
 Hardcoded credentials (for demo purposes):
 
-Admin: admin / admin123
+Admin User: admin Password: admin123
 
-Analyst: analyst / analyst123
+Analyst User: analyst Password: analyst123
 
 ### 2. Data Upload & Processing
 CSV file upload (drag-and-drop or file browser)
